@@ -1,77 +1,145 @@
 import React, { Component } from 'react';
 import { Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import moment from 'moment-timezone';
+import AddTodo from './AddTodo';
+import Task from '../Components/Task';
 
 export default class Dashboard extends Component {
+	state = {
+		showAddBox: false
+	};
+
+	showAddBox = bool => {
+		this.setState({ showAddBox: bool });
+	};
+
 	render() {
-		const { textStyle, viewStyle, scrollViewStyle, addTaskBtn } = styles;
+		const {
+			mainViewStyle,
+			innerViewStyle,
+			headerViewStyle,
+			headingDayText,
+			headingDateText,
+			headingMonthText,
+			scrollViewStyle,
+			addTaskBtn
+		} = styles;
 
 		return (
-			<View style={viewStyle.main}>
-				<View style={viewStyle.header}>
-					<Text style={textStyle.heading.day}>
-						{moment().format('dddd')},{' '}
-						<Text style={textStyle.heading.date}>{moment().format('Do')}</Text>
-					</Text>
-					<Text style={textStyle.heading.month}>{moment().format('MMMM, YYYY')}</Text>
-					<TouchableOpacity style={addTaskBtn}>
-						<Text style={{ fontSize: 35, color: '#fff' }}>+</Text>
-					</TouchableOpacity>
+			<View style={mainViewStyle}>
+				<View style={innerViewStyle}>
+					<View style={headerViewStyle}>
+						<Text style={headingDayText}>
+							{moment().format('dddd')},{' '}
+							<Text style={headingDateText}>{moment().format('Do')}</Text>
+						</Text>
+						<Text style={headingMonthText}>{moment().format('MMMM, YYYY')}</Text>
+
+						<TouchableOpacity style={addTaskBtn} onPress={() => this.showAddBox(true)}>
+							<Text style={{ fontSize: 35, color: '#fff' }}>+</Text>
+						</TouchableOpacity>
+					</View>
+
+					<ScrollView style={scrollViewStyle}>
+						<Task
+							task={{
+								task: 'This will be a todo hurrat im adding more here',
+								time: '9:15PM',
+								priority: 'normal'
+							}}
+						/>
+						<Task
+							task={{
+								task: 'This will be a todo hurrat im adding more here',
+								time: '9:15PM',
+								priority: 'normal'
+							}}
+						/>
+						<Task
+							task={{
+								task: 'This will be a todo hurrat im adding more here',
+								time: '9:15PM',
+								priority: 'normal'
+							}}
+						/>
+						<Task
+							task={{
+								task: 'This will be a todo hurrat im adding more here',
+								time: '9:15PM',
+								priority: 'low'
+							}}
+						/>
+						<Task
+							task={{
+								task: 'This will be a todo hurrat im adding more here',
+								time: '9:15PM',
+								priority: 'normal'
+							}}
+						/>
+						<Task
+							task={{
+								task: 'This will be a todo hurrat im adding more here',
+								time: '9:15PM',
+								priority: 'high'
+							}}
+						/>
+						<Task
+							task={{
+								task: 'This will be a todo hurrat im adding more here',
+								time: '9:15PM',
+								priority: 'normal'
+							}}
+						/>
+						<Task
+							task={{
+								task: 'This will be a todo hurrat im adding more here',
+								time: '9:15PM',
+								priority: 'normal'
+							}}
+						/>
+					</ScrollView>
 				</View>
-				<ScrollView style={scrollViewStyle}>
-					<Text>Hi From Dashboard</Text>
-				</ScrollView>
+
+				{this.state.showAddBox && <AddTodo showAddBox={this.showAddBox} />}
 			</View>
 		);
 	}
 }
 
 const styles = {
-	viewStyle: {
-		main: {
-			flex: 1,
-			backgroundColor: '#fff',
-			// paddingLeft: 10,
-			// paddingRight: 10,
-			// paddingTop: 10,
-			// paddingBottom: 10,
-			borderRadius: 5,
-			position: 'relative'
-		},
-		header: {
-			backgroundColor: '#fcfcfc',
-			paddingLeft: 25,
-			paddingRight: 25,
-			paddingTop: 25,
-			paddingBottom: 25,
-			borderTopLeftRadius: 5,
-			borderTopRightRadius: 5
-		}
+	mainViewStyle: {
+		position: 'absolute',
+		flex: 1,
+		height: '100%',
+		width: '100%',
+		top: 10,
+		left: 10,
+		backgroundColor: '#fff',
+		borderRadius: 5
+	},
+	innerViewStyle: {
+		flex: 1,
+		position: 'relative'
+	},
+	headerViewStyle: {
+		backgroundColor: '#fcfcfc',
+		paddingLeft: 25,
+		paddingRight: 25,
+		paddingTop: 25,
+		paddingBottom: 25,
+		borderTopLeftRadius: 5,
+		borderTopRightRadius: 5,
+		elevation: 2
 	},
 	scrollViewStyle: {
 		flex: 1,
-		borderWidth: 1,
 		borderBottomLeftRadius: 5,
-		borderBottomRightRadius: 5
+		borderBottomRightRadius: 5,
+		paddingBottom: 5
 	},
-	textStyle: {
-		heading: {
-			day: {
-				fontSize: 25,
-				fontWeight: '600',
-				color: '#4F80FE'
-			},
-			date: {
-				fontSize: 24,
-				fontWeight: '100',
-				color: '#4F80FE'
-			},
-			month: {
-				// fontWeight: '100',
-				color: '#999'
-			}
-		}
-	},
+	headingDayText: { fontSize: 25, fontWeight: '600', color: '#4F80FE' },
+	headingDateText: { fontSize: 24, fontWeight: '100', color: '#4F80FE' },
+	headingMonthText: { color: '#999' },
 	addTaskBtn: {
 		alignItems: 'center',
 		justifyContent: 'center',

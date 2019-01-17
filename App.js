@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { View } from 'react-native';
 import Dashboard from './src/Screens/Dashboard';
-// import MyText from './src/Components/MyText';
 
 export default class App extends Component {
 	render() {
@@ -10,6 +9,7 @@ export default class App extends Component {
 		return (
 			<View style={viewStyle}>
 				<Dashboard />
+				{/* <AddTodo /> */}
 			</View>
 		);
 	}
@@ -22,6 +22,7 @@ const styles = {
 		paddingLeft: 10,
 		paddingRight: 10,
 		paddingTop: 10,
-		paddingBottom: 10
+		paddingBottom: 10,
+		position: 'relative'
 	}
 };
