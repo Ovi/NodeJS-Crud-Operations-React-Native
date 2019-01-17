@@ -163,7 +163,8 @@ const styles = {
 		justifyContent: 'center',
 		backgroundColor: 'rgba(0,0,0,0.9)',
 		// backgroundColor: 'red',
-		borderRadius: 5
+		borderRadius: 5,
+		elevation: 3
 	},
 	addTaskBtn: {
 		alignItems: 'center',

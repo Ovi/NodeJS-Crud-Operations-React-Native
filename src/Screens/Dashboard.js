@@ -45,27 +45,6 @@ export default class Dashboard extends Component {
 							task={{
 								task: 'This will be a todo hurrat im adding more here',
 								time: '9:15PM',
-								priority: 'normal'
-							}}
-						/>
-						<Task
-							task={{
-								task: 'This will be a todo hurrat im adding more here',
-								time: '9:15PM',
-								priority: 'normal'
-							}}
-						/>
-						<Task
-							task={{
-								task: 'This will be a todo hurrat im adding more here',
-								time: '9:15PM',
-								priority: 'normal'
-							}}
-						/>
-						<Task
-							task={{
-								task: 'This will be a todo hurrat im adding more here',
-								time: '9:15PM',
 								priority: 'low'
 							}}
 						/>
@@ -81,20 +60,6 @@ export default class Dashboard extends Component {
 								task: 'This will be a todo hurrat im adding more here',
 								time: '9:15PM',
 								priority: 'high'
-							}}
-						/>
-						<Task
-							task={{
-								task: 'This will be a todo hurrat im adding more here',
-								time: '9:15PM',
-								priority: 'normal'
-							}}
-						/>
-						<Task
-							task={{
-								task: 'This will be a todo hurrat im adding more here',
-								time: '9:15PM',
-								priority: 'normal'
 							}}
 						/>
 					</ScrollView>
