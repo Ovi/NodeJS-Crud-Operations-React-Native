@@ -1,16 +1,80 @@
 import React, { Component } from 'react';
-import { Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { Text, View, ScrollView, ToastAndroid, ActivityIndicator } from 'react-native';
 import moment from 'moment-timezone';
-import AddTodo from './AddTodo';
+import DeviceInfo from 'react-native-device-info';
 import Task from '../Components/Task';
+import AddTodo from './AddTodo';
 
 export default class Dashboard extends Component {
 	state = {
-		showAddBox: false
+		addingTodo: false,
+		newTaskText: '',
+		todos: [],
+		todosLoading: true
 	};
 
-	showAddBox = bool => {
-		this.setState({ showAddBox: bool });
+	componentDidMount() {
+		this.getTasks();
+	}
+
+	getTasks = () => {
+		const deviceId = DeviceInfo.getUniqueID();
+
+		// eslint-disable-next-line no-undef
+		fetch(`https://mrtodos.herokuapp.com/get?id=${deviceId}`)
+			.then(res => res.json())
+			.then(res => {
+				this.setState({ todos: res.todos, todosLoading: false });
+			})
+			.catch(err => {
+				ToastAndroid.show(err.message, ToastAndroid.SHORT);
+			});
+	};
+
+	addingTodo = bool => {
+		this.setState({ addingTodo: bool });
+	};
+
+	renderTodos = () => {
+		const { todos, todosLoading, addingTodo } = this.state;
+
+		const NoTask = (
+			<View
+				style={{
+					alignSelf: 'center',
+					alignItems: 'center',
+					flexDirection: 'column',
+					justifyContent: 'center',
+					padding: 25
+				}}
+			>
+				<Text>No Task</Text>
+				<Text>Tap above to add one!</Text>
+			</View>
+		);
+
+		const activityIndicator = (
+			<View
+				style={{
+					alignSelf: 'center',
+					alignItems: 'center',
+					padding: 25
+				}}
+			>
+				<ActivityIndicator size="large" color="#4F80FE" />
+			</View>
+		);
+
+		if (!todos.length) {
+			console.log(todos);
+			if (todosLoading) {
+				return activityIndicator;
+			} else if (!addingTodo) {
+				return NoTask;
+			}
+		}
+		// eslint-disable-next-line no-underscore-dangle
+		return todos.map(todo => <Task getTasks={this.getTasks} key={todo._id} task={todo} />);
 	};
 
 	render() {
@@ -21,8 +85,7 @@ export default class Dashboard extends Component {
 			headingDayText,
 			headingDateText,
 			headingMonthText,
-			scrollViewStyle,
-			addTaskBtn
+			scrollViewStyle
 		} = styles;
 
 		return (
@@ -35,37 +98,33 @@ export default class Dashboard extends Component {
 						</Text>
 						<Text style={headingMonthText}>{moment().format('MMMM, YYYY')}</Text>
 
-						<TouchableOpacity style={addTaskBtn} onPress={() => this.showAddBox(true)}>
-							<Text style={{ fontSize: 35, color: '#fff' }}>+</Text>
-						</TouchableOpacity>
+						<Text
+							style={{
+								fontSize: 15,
+								color: 'rgba(0,0,0,.5)',
+								position: 'absolute',
+								right: 30,
+								top: 40
+							}}
+						>
+							{this.state.todos.length} Tasks
+						</Text>
+						<Text
+							style={{
+								fontSize: 15,
+								color: 'rgba(0,0,0,.5)',
+								position: 'absolute',
+								right: 30,
+								top: 55
+							}}
+						>
+							{this.state.todos.filter(todo => !todo.checked).length} Pending
+						</Text>
 					</View>
 
-					<ScrollView style={scrollViewStyle}>
-						<Task
-							task={{
-								task: 'This will be a todo hurrat im adding more here',
-								time: '9:15PM',
-								priority: 'low'
-							}}
-						/>
-						<Task
-							task={{
-								task: 'This will be a todo hurrat im adding more here',
-								time: '9:15PM',
-								priority: 'normal'
-							}}
-						/>
-						<Task
-							task={{
-								task: 'This will be a todo hurrat im adding more here',
-								time: '9:15PM',
-								priority: 'high'
-							}}
-						/>
-					</ScrollView>
+					<AddTodo addingTodo={this.addingTodo} getTasks={this.getTasks} />
+					<ScrollView style={scrollViewStyle}>{this.renderTodos()}</ScrollView>
 				</View>
-
-				{this.state.showAddBox && <AddTodo showAddBox={this.showAddBox} />}
 			</View>
 		);
 	}

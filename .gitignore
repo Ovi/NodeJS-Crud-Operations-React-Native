@@ -54,3 +54,8 @@ buck-out/
 
 # Bundle artifact
 *.jsbundle
+
+# API
+/api/node_modules
+/api/data.txt
+/api/demoServer.js

@@ -1,121 +1,200 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
+/* eslint-disable no-nested-ternary */
 import React, { Component } from 'react';
-import { Text, View, CheckBox, TouchableOpacity, Image } from 'react-native';
+import {
+	Text,
+	View,
+	CheckBox,
+	TouchableOpacity,
+	Image,
+	ToastAndroid,
+	ActivityIndicator
+} from 'react-native';
+import Swipeout from 'react-native-swipeout';
 
 export default class Task extends Component {
-	state = {};
+	state = {
+		deleting: false,
+		swiped: false
+	};
 
-	setPriorityColor = priority => {
-		let color;
-		switch (priority) {
-			case 'normal':
-				color = '#4F80FE';
-				break;
-			case 'low':
-				color = 'yellow';
-				break;
-			case 'high':
-				color = 'darkred';
-				break;
-			default:
-				color = '#4F80FE';
-				break;
-		}
-		return color;
+	updateChecked = () => {
+		const {
+			task: { checked, _id: id },
+			getTasks
+		} = this.props;
+
+		// eslint-disable-next-line no-undef
+		fetch('https://mrtodos.herokuapp.com/update', {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				id,
+				checked: !checked
+			})
+		})
+			.then(() => getTasks())
+			.catch(err => ToastAndroid.show(err.message, ToastAndroid.SHORT));
+	};
+
+	deleteTask = () => {
+		const {
+			task: { _id: id },
+			getTasks
+		} = this.props;
+
+		this.setState({ deleting: true });
+
+		// eslint-disable-next-line no-undef
+		fetch('https://mrtodos.herokuapp.com/delete', {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ id })
+		})
+			.then(() => {
+				getTasks();
+				this.setState({ deleting: false });
+			})
+			.catch(err => {
+				this.setState({ deleting: false });
+				ToastAndroid.show(err.message, ToastAndroid.SHORT);
+			});
 	};
 
 	render() {
 		const { task } = this.props;
-		return (
+
+		const deleteBtn = this.state.deleting ? (
 			<View
 				style={{
-					height: 80,
-					padding: 5,
-					justifyContent: 'space-between',
-					alignItems: 'center',
-					flexDirection: 'row',
-					borderBottomWidth: 1,
-					borderBottomColor: this.state.checked ? 'rgba(0,0,0,.1)' : 'rgba(0,0,0,.3)'
+					height: '100%',
+					padding: 10,
+					justifyContent: 'center'
 				}}
 			>
-				<View style={{ position: 'relative' }}>
-					<Text
-						style={{
-							position: 'absolute',
-							bottom: 5,
-							color: this.state.checked ? 'lightgray' : 'black',
-							paddingLeft: 8,
-							textDecorationLine: this.state.checked ? 'line-through' : 'none'
-						}}
-					>
-						{task.task}
-					</Text>
-					<Text
-						style={{
-							fontSize: 13,
-							color: this.state.checked ? 'lightgray' : 'gray',
-							marginLeft: 8,
-							position: 'absolute',
-							bottom: -16
-						}}
-					>
-						Today
-					</Text>
-					<View style={{ position: 'absolute', bottom: -33 }}>
-						<Text
-							style={{
-								fontSize: 13,
-								color: this.state.checked ? 'lightgray' : '#333',
-								marginLeft: 25
-							}}
-						>
-							{task.time}
-						</Text>
-						<View
-							style={{
-								position: 'absolute',
-								bottom: 3,
-								left: 8,
-								height: 10,
-								width: 10,
-								borderRadius: 100,
-								backgroundColor: this.setPriorityColor(task.priority)
-							}}
-						/>
-					</View>
-				</View>
-				<View>
+				<ActivityIndicator size="small" color="#4F80FE" />
+			</View>
+		) : (
+			<TouchableOpacity
+				onPress={this.deleteTask}
+				style={{
+					justifyContent: 'center',
+					alignItems: 'center',
+					backgroundColor: '#fff',
+					position: 'absolute',
+					right: 0,
+					width: 40,
+					top: 1,
+					height: '95%'
+				}}
+			>
+				<Image
+					style={{ width: 20, height: 20 }}
+					source={{
+						uri: 'https://img.icons8.com/material-outlined/20/333333/trash.png'
+					}}
+				/>
+			</TouchableOpacity>
+		);
+		const swipeoutBtns = [
+			{
+				component: (
 					<View
 						style={{
-							height: 60,
-							padding: 0,
-							justifyContent: 'space-around',
-							alignItems: 'center'
+							height: 65,
+							width: 75,
+							borderBottomWidth: 1,
+							borderBottomColor: 'rgba(0,0,0,.3)'
+						}}
+					>
+						{deleteBtn}
+					</View>
+				),
+				backgroundColor: '#fff'
+			}
+		];
+
+		return (
+			<Swipeout
+				style={{ backgroundColor: '#fff' }}
+				disabled={task.checked}
+				autoClose
+				right={swipeoutBtns}
+				onOpen={() => this.setState({ swiped: true })}
+				onClose={() => this.setState({ swiped: false })}
+			>
+				<View
+					style={{
+						position: 'relative',
+						height: 65,
+						borderBottomWidth: 1,
+						borderBottomColor: 'rgba(0,0,0,.3)',
+						marginBottom: 2,
+						alignItems: 'center',
+						flexDirection: 'row',
+						justifyContent: 'space-between'
+					}}
+				>
+					<View
+						style={{
+							alignItems: 'center',
+							flexDirection: 'row'
 						}}
 					>
 						<CheckBox
-							value={this.state.checked}
-							onValueChange={() => this.setState({ checked: !this.state.checked })}
+							style={{ margin: 8 }}
+							value={task.checked}
+							onValueChange={this.updateChecked}
 						/>
-						{/* <Text>BB</Text> */}
-					</View>
-					{this.state.checked && (
-						<TouchableOpacity
-							style={{
-								justifyContent: 'center',
-								alignItems: 'center',
-								marginTop: -15
-							}}
-						>
-							<Image
-								style={{ width: 20, height: 20 }}
-								source={{
-									uri: 'https://img.icons8.com/material-outlined/20/D3D3DB/trash.png'
+						<TouchableOpacity onPress={this.updateChecked}>
+							<Text
+								style={{
+									width: 'auto',
+									minWidth: 250,
+									marginLeft: -5,
+									fontSize: 16,
+									textDecorationLine: task.checked ? 'line-through' : 'none'
 								}}
-							/>
+							>
+								{task.task}
+							</Text>
 						</TouchableOpacity>
-					)}
+					</View>
+
+					{task.checked
+						? deleteBtn
+						: !this.state.swiped && (
+								<TouchableOpacity
+									style={{
+										justifyContent: 'center',
+										alignItems: 'center',
+										backgroundColor: '#fff',
+										position: 'absolute',
+										right: 0,
+										width: 40,
+										top: 1,
+										height: '95%'
+									}}
+									onPress={() => ToastAndroid.show('Swipe', ToastAndroid.SHORT)}
+								>
+									<Text
+										style={{
+											color: '#333',
+											fontSize: 20,
+											fontWeight: 'bold',
+											marginBottom: 10
+										}}
+									>
+										&#x21E2;
+									</Text>
+								</TouchableOpacity>
+						  )}
 				</View>
-			</View>
+			</Swipeout>
 		);
 	}
 }

@@ -2,181 +2,155 @@ import React, { Component } from 'react';
 import {
 	Text,
 	View,
-	TimePickerAndroid,
 	TouchableOpacity,
 	TextInput,
 	ToastAndroid,
-	Picker
+	ActivityIndicator
 } from 'react-native';
-import moment from 'moment-timezone';
+import DeviceInfo from 'react-native-device-info';
 
 export default class AddTodo extends Component {
 	state = {
 		taskText: '',
-		taskTime: moment().format('h:mm A'),
-		priority: 'normal'
+		showAddBox: false,
+		addingTodo: false
 	};
 
-	componentDidMount = () => {
-		this.setState({
-			taskText: '',
-			taskTime: moment().format('h:mm A'),
-			priority: 'normal'
-		});
-	};
-
-	openTimePicker = async () => {
-		try {
-			const { action, hour, minute } = await TimePickerAndroid.open();
-			if (action !== TimePickerAndroid.dismissedAction) {
-				this.setState({ taskTime: moment(`${hour}-${minute}`, 'H-m').format('h:mm A') });
-			}
-		} catch ({ code, message }) {
-			console.warn('Cannot open time picker', message);
-		}
+	newTodo = () => {
+		this.setState({ showAddBox: !this.state.showAddBox });
+		this.props.addingTodo(!this.state.showAddBox);
 	};
 
 	addTodo = () => {
-		const { taskText, taskTime } = this.state;
-		if (!taskTime) {
-			ToastAndroid.show('Todo time is required! Ofcourse!', ToastAndroid.SHORT);
-			return;
+		const { taskText } = this.state;
+		const deviceId = DeviceInfo.getUniqueID();
+
+		if (taskText) {
+			this.setState({ addingTodo: true });
+			// eslint-disable-next-line no-undef
+			fetch('https://mrtodos.herokuapp.com/add', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					task: taskText,
+					checked: false,
+					deviceId
+				})
+			})
+				.then(() => {
+					ToastAndroid.show('Task Added!', ToastAndroid.SHORT);
+					this.props.getTasks();
+					this.newTodo();
+					this.setState({
+						taskText: '',
+						addingTodo: false
+					});
+				})
+				.catch(err => {
+					ToastAndroid.show(err.message, ToastAndroid.SHORT);
+					this.newTodo();
+					this.setState({ addingTodo: false });
+				});
+		} else {
+			this.newTodo();
 		}
-		if (!taskText) {
-			ToastAndroid.show('Todo text is required! Ofcourse!', ToastAndroid.SHORT);
-			return;
-		}
-		console.log('adding todo...', { taskTime, taskText });
 	};
 
 	render() {
-		const { mainViewStyle, addTaskBtn } = styles;
-
 		return (
-			<View style={mainViewStyle}>
-				<View
-					style={{
-						width: '80%',
-						maxWidth: 300,
-						padding: 20,
-						backgroundColor: '#fff',
-						borderRadius: 5,
-						position: 'relative',
-						minHeight: 320,
-						borderWidth: 0.5
-					}}
-				>
-					<Text
+			<View>
+				<TouchableOpacity onPress={this.newTodo}>
+					<View
 						style={{
-							textAlign: 'center',
-							fontSize: 24,
-							fontWeight: '600',
-							color: '#4F80FE',
-							marginBottom: -10
-						}}
-					>
-						add
-					</Text>
-					<Text style={{ textAlign: 'center', fontSize: 28, fontWeight: '600', color: '#EB4A8A' }}>
-						new task
-					</Text>
-					<TextInput
-						style={{
-							height: 40,
 							borderBottomWidth: 1,
-							borderBottomColor: 'gray'
-						}}
-						onChangeText={text => this.setState({ taskText: text })}
-						value={this.state.taskText}
-						placeholder="What?"
-						maxLength={40}
-					/>
-					<TextInput
-						style={{
-							height: 40,
-							borderBottomWidth: 1,
-							borderBottomColor: 'gray'
-						}}
-						value={this.state.taskTime}
-					/>
-					<TouchableOpacity
-						style={{
-							backgroundColor: '#EB4A8A',
-							padding: 5,
-							paddingLeft: 10,
-							paddingRight: 10,
-							width: 105,
-							marginTop: 10,
-							borderRadius: 5
-						}}
-						onPress={this.openTimePicker}
-					>
-						<Text style={{ color: '#fff' }}>Change Time</Text>
-					</TouchableOpacity>
-
-					<Text style={{ marginBottom: -10, marginTop: 10, marginLeft: 8 }}>Priority: </Text>
-					<Picker
-						selectedValue={this.state.priority}
-						style={{ width: '100%', marginBottom: 10 }}
-						onValueChange={itemValue => this.setState({ priority: itemValue })}
-					>
-						<Picker.Item label="Normal" value="normal" />
-						<Picker.Item label="Low" value="low" />
-						<Picker.Item label="High" value="high" />
-					</Picker>
-
-					<TouchableOpacity
-						onPress={() => this.props.showAddBox(false)}
-						style={{
-							position: 'absolute',
-							top: -10,
-							right: -10,
-							backgroundColor: 'gray',
-							width: 35,
-							height: 35,
-							borderRadius: 10,
+							borderBottomColor: 'rgba(0,0,0,.5)',
 							alignItems: 'center',
-							justifyContent: 'center'
+							flexDirection: 'row',
+							padding: 5
 						}}
 					>
-						<Text style={{ fontSize: 30, color: 'white' }}>&#215;</Text>
-					</TouchableOpacity>
-					<TouchableOpacity style={addTaskBtn} onPress={this.addTodo}>
-						<Text style={{ fontSize: 35, color: '#fff' }}>&#43;</Text>
-					</TouchableOpacity>
-				</View>
+						<Text style={{ color: '#4F80FE', fontSize: 40, marginLeft: 20 }}>+ </Text>
+						<Text
+							style={{
+								color: '#333',
+								fontSize: 20,
+								fontWeight: 'bold',
+								marginTop: 5
+							}}
+						>
+							Add a task
+						</Text>
+					</View>
+				</TouchableOpacity>
+				{this.state.showAddBox && (
+					<View
+						style={{
+							position: 'relative',
+							height: 65,
+							borderBottomWidth: 1,
+							borderBottomColor: 'rgba(0,0,0,.3)',
+							marginBottom: 2,
+							alignItems: 'center',
+							flexDirection: 'row',
+							justifyContent: 'space-between'
+						}}
+					>
+						<View
+							style={{
+								alignItems: 'center',
+								flexDirection: 'row'
+							}}
+						>
+							<TextInput
+								style={{
+									height: 65,
+									fontSize: 18,
+									width: 'auto',
+									minWidth: 250,
+									marginLeft: 8
+								}}
+								onChangeText={taskText => this.setState({ taskText })}
+								value={this.state.taskText}
+								placeholder="Start typing"
+								maxLength={35}
+								onEndEditing={this.addTodo}
+							/>
+						</View>
+
+						{this.state.addingTodo ? (
+							<View
+								style={{
+									height: '100%',
+									padding: 10,
+									justifyContent: 'center'
+								}}
+							>
+								<ActivityIndicator size="small" color="#4F80FE" />
+							</View>
+						) : (
+							<TouchableOpacity onPress={this.addTodo}>
+								<View
+									style={{
+										alignItems: 'center',
+										justifyContent: 'center',
+										height: 30,
+										width: 30,
+										marginRight: 5,
+										alignSelf: 'center',
+										borderWidth: 1,
+										borderColor: 'rgba(0,0,0,.3)',
+										borderRadius: 100
+									}}
+								>
+									<Text style={{ color: '#333' }}>&#x2713;</Text>
+								</View>
+							</TouchableOpacity>
+						)}
+					</View>
+				)}
 			</View>
 		);
 	}
 }
-
-const styles = {
-	mainViewStyle: {
-		position: 'absolute',
-		flex: 1,
-		height: '100%',
-		width: '100%',
-		top: 0,
-		left: 0,
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		backgroundColor: 'rgba(0,0,0,0.9)',
-		// backgroundColor: 'red',
-		borderRadius: 5,
-		elevation: 3
-	},
-	addTaskBtn: {
-		alignItems: 'center',
-		justifyContent: 'center',
-		width: 60,
-		height: 60,
-		backgroundColor: '#4F80FE',
-		borderRadius: 100,
-		position: 'absolute',
-		bottom: -20,
-		right: 15,
-		elevation: 4,
-		zIndex: 2
-	}
-};

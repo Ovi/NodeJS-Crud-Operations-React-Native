@@ -1,0 +1,19 @@
+{
+	"name": "NodeJSTodos",
+	"version": "1.0.2",
+	"description": "Simple CRUD Operations Using NodeJS and React Native",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"serve": "nodemon server.js"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"cors": "^2.8.5",
+		"express": "^4.16.4",
+		"mongoose": "^5.4.3",
+		"nodemon": "^1.18.9"
+	}
+}
